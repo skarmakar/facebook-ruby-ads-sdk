@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 # FACEBOOK_ACCESS_TOKEN=... rspec spec/facebook_ads/ad_campaign_spec.rb
@@ -42,7 +44,7 @@ describe FacebookAds::AdCampaign do
         daily_budget: 500, # This is in cents, so the daily budget here is $5.
         billing_event: 'IMPRESSIONS',
         status: 'PAUSED',
-        is_autobid: true
+        bid_strategy: 'LOWEST_COST_WITHOUT_CAP'
       )
       expect(ad_set.id).to eq('120330000008135715')
     end

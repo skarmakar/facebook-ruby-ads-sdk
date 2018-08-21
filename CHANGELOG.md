@@ -1,3 +1,9 @@
+## 0.6.3 (2018-05-17)
+  - Replaced deprecated `is_autobid` with new `bid_strategy` field
+
+## 0.6.2 (2018-05-08)
+  - Set Product Catalog path to `/owned_product_catalogs` for API v2.11 compatibility
+
 ## 0.4 (2017-07-25)
  - Added ability to pass `bid_amount` parameter when creating ad sets
  - Ad Set `is_autobid` parameter now defaults to `nil` rather than `true`

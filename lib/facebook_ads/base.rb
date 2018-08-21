@@ -1,20 +1,22 @@
+# frozen_string_literal: true
+
 module FacebookAds
   # The base class for all ads objects.
   class Base < Hashie::Mash
     class << self
-      def find(id)
-        get("/#{id}", objectify: true)
-      end
+      # HTTP verbs.
 
       def get(path, query: {}, objectify:)
-        query = pack(query, objectify: objectify) # Adds access token, fields, etc.
+        query = pack(query, objectify: objectify)
         uri = "#{FacebookAds.base_uri}#{path}?" + build_nested_query(query)
         FacebookAds.logger.debug "GET #{uri}"
+
         response = begin
           RestClient.get(uri, accept: :json, accept_encoding: :identity)
         rescue RestClient::Exception => e
           exception(:get, path, e)
         end
+
         unpack(response, objectify: objectify)
       end
 
@@ -22,11 +24,13 @@ module FacebookAds
         query = pack(query, objectify: false)
         uri = "#{FacebookAds.base_uri}#{path}"
         FacebookAds.logger.debug "POST #{uri} #{query}"
+
         response = begin
           RestClient.post(uri, query)
         rescue RestClient::Exception => e
           exception(:post, path, e)
         end
+
         unpack(response, objectify: false)
       end
 
@@ -34,28 +38,50 @@ module FacebookAds
         query = pack(query, objectify: false)
         uri = "#{FacebookAds.base_uri}#{path}?" + build_nested_query(query)
         FacebookAds.logger.debug "DELETE #{uri}"
+
         response = begin
           RestClient.delete(uri)
         rescue RestClient::Exception => e
           exception(:delete, path, e)
         end
+
         unpack(response, objectify: false)
       end
 
-      def paginate(path, query: {})
-        query[:limit] ||= 100
-        limit = query[:limit]
-        response = get(path, query: query.merge(fields: self::FIELDS.join(',')), objectify: false)
-        data = response['data'].nil? ? [] : response['data']
+      # Common idioms.
 
-        if data.length == limit
+      def all(_query = {})
+        raise StandardError, 'Subclass must implement `all`.'
+      end
+
+      def find(id)
+        get("/#{id}", objectify: true)
+      end
+
+      def find_by(conditions)
+        all.detect do |object|
+          conditions.all? do |key, value|
+            object.send(key) == value
+          end
+        end
+      end
+
+      def paginate(path, query: {})
+        query    = query.merge(limit: 100) unless query[:limit]
+        query    = query.merge(fields: self::FIELDS.join(',')) unless query[:fields] || self::FIELDS.empty?
+        response = get(path, query: query, objectify: false)
+        data     = response['data'].nil? ? [] : response['data']
+
+        if data.length == query[:limit]
           while !(paging = response['paging']).nil? && !(url = paging['next']).nil?
             FacebookAds.logger.debug "GET #{url}"
+
             response = begin
               RestClient.get(url)
             rescue RestClient::Exception => e
               exception(:get, url, e)
             end
+
             response = unpack(response, objectify: false)
             data += response['data'] unless response['data'].nil?
           end
@@ -85,8 +111,8 @@ module FacebookAds
       def pack(hash, objectify:)
         hash = hash.merge(access_token: FacebookAds.access_token)
         hash = hash.merge(appsecret_proof: FacebookAds.appsecret_proof) if FacebookAds.app_secret
-        hash = hash.merge(fields: self::FIELDS.join(',')) if objectify
-        hash.delete_if { |_k, v| v.nil? }
+        hash = hash.merge(fields: self::FIELDS.join(',')) if objectify && !hash[:fields] && !self::FIELDS.empty?
+        hash.reject { |_key, value| value.nil? || (value.respond_to?(:empty?) && value.empty?) }
       end
 
       def unpack(response, objectify:)

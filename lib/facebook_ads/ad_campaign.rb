@@ -1,5 +1,6 @@
+# frozen_string_literal: true
+
 module FacebookAds
-  # An ad campaign has many ad sets and belongs to an ad account.
   # https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group
   class AdCampaign < Base
     FIELDS = %w[
@@ -45,21 +46,22 @@ module FacebookAds
       VIDEO_VIEWS
     ].freeze
 
-    # belongs_to ad_account
+    # AdAccount
 
     def ad_account
       @ad_account ||= AdAccount.find("act_#{account_id}")
     end
 
-    # has_many ad_sets
+    # AdSet
 
     def ad_sets(effective_status: ['ACTIVE'], limit: 100)
       AdSet.paginate("/#{id}/adsets", query: { effective_status: effective_status, limit: limit })
     end
 
-    def create_ad_set(name:, promoted_object: {}, targeting:, daily_budget: nil, lifetime_budget: nil, end_time: nil, optimization_goal:, billing_event: 'IMPRESSIONS', status: 'ACTIVE', is_autobid: nil, bid_amount: nil)
+    def create_ad_set(name:, promoted_object: {}, targeting:, daily_budget: nil, lifetime_budget: nil, end_time: nil, optimization_goal:, billing_event: 'IMPRESSIONS', status: 'ACTIVE', bid_strategy: nil, bid_amount: nil)
       raise Exception, "Optimization goal must be one of: #{AdSet::OPTIMIZATION_GOALS.join(', ')}" unless AdSet::OPTIMIZATION_GOALS.include?(optimization_goal)
       raise Exception, "Billing event must be one of: #{AdSet::BILLING_EVENTS.join(', ')}" unless AdSet::BILLING_EVENTS.include?(billing_event)
+      raise Exception, "Bid strategy must be one of: #{AdSet::BID_STRATEGIES.join(', ')}" unless AdSet::BID_STRATEGIES.include?(bid_strategy)
 
       if targeting.is_a?(Hash)
         # NOP
@@ -76,7 +78,7 @@ module FacebookAds
         optimization_goal: optimization_goal,
         billing_event: billing_event,
         status: status,
-        is_autobid: is_autobid,
+        bid_strategy: bid_strategy,
         bid_amount: bid_amount
       }
 
@@ -93,7 +95,7 @@ module FacebookAds
       AdSet.find(result['id'])
     end
 
-    # has_many ad_insights
+    # AdInsight
 
     def ad_insights(range: Date.today..Date.today, level: 'ad', time_increment: 1)
       query = {
@@ -101,6 +103,7 @@ module FacebookAds
         time_increment: time_increment,
         time_range: { since: range.first.to_s, until: range.last.to_s }
       }
+
       AdInsight.paginate("/#{id}/insights", query: query)
     end
   end

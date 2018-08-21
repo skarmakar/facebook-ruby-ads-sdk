@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FacebookAds
   # https://developers.facebook.com/docs/marketing-api/reference/product-catalog
   class AdProductCatalog < Base
@@ -5,20 +7,12 @@ module FacebookAds
 
     class << self
       def all(query = {})
-        get("/#{FacebookAds.business_id}/product_catalogs", query: query, objectify: true)
-      end
-
-      def find_by(conditions)
-        all.detect do |object|
-          conditions.all? do |key, value|
-            object.send(key) == value
-          end
-        end
+        get("/#{FacebookAds.business_id}/owned_product_catalogs", query: query, objectify: true)
       end
 
       def create(name:)
         query = { name: name }
-        result = post("/#{FacebookAds.business_id}/product_catalogs", query: query)
+        result = post("/#{FacebookAds.business_id}/owned_product_catalogs", query: query)
         find(result['id'])
       end
     end

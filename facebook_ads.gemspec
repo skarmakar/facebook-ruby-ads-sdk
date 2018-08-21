@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
+# frozen_string_literal: true
 
 # To publish the next version:
 # gem build facebook_ads.gemspec
-# gem push facebook_ads-0.6.0.gem
+# gem push facebook_ads-0.6.2.gem
 Gem::Specification.new do |s|
   s.name        = 'facebook_ads'
-  s.version     = '0.6.1'
+  s.version     = '0.6.3'
   s.platform    = Gem::Platform::RUBY
   s.licenses    = ['MIT']
   s.authors     = ['Chris Estreich']
