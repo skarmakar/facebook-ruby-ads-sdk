@@ -3,10 +3,9 @@
 module FacebookAds
   # Ad insights exist for ad accounts, ad campaigns, ad sets, and ads.
   # A lot more can be done here.
-  # https://developers.facebook.com/docs/marketing-api/insights/overview
-  # https://developers.facebook.com/docs/marketing-api/insights/fields/v3.1
-  class AdInsight < Base
-    FIELDS = %w[account_id campaign_id adset_id ad_id ad_name objective impressions actions inline_link_clicks unique_actions cost_per_unique_action_type clicks cpc cpm cpp ctr spend reach frequency unique_clicks].freeze
+  # https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving
+  class AdLead < Base
+    FIELDS = %w[created_time,id,ad_id,form_id,field_data].freeze
 
     class << self
       def find(_id)

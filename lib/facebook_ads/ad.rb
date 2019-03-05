@@ -41,5 +41,14 @@ module FacebookAds
       }
       AdInsight.paginate("/#{id}/insights", query: query)
     end
+
+    def ad_leads(range: Date.today..Date.today)
+      query = {
+        'from_date': range.first.beginning_of_day.utc.to_i, 
+        'to_date':   [range.last.end_of_day.utc.to_i, Time.now.utc.to_i].max 
+      }
+
+      AdLead.paginate("/#{id}/leads", query: query)
+    end
   end
 end
