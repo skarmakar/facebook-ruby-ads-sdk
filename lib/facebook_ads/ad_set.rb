@@ -21,8 +21,8 @@ module FacebookAds
       lifetime_budget
       promoted_object
       targeting
-      created_time
-      updated_time
+      start_time
+      end_time
     ].freeze
 
     STATUSES = %w[
