@@ -25,8 +25,15 @@ module FacebookAds
 
     # AdCampaign
 
-    def ad_campaigns(effective_status: ['ACTIVE'], limit: 100)
-      AdCampaign.paginate("/#{id}/campaigns", query: { effective_status: effective_status, limit: limit })
+    def ad_campaigns(effective_status: ['ACTIVE'], limit: 100, fields: nil)
+      query = { effective_status: effective_status, limit: limit }
+      
+      # fields expected to be a comma separated string
+      if fields
+        query[:fields] = fields
+      end
+      
+      AdCampaign.paginate("/#{id}/campaigns", query: query)
     end
 
     def create_ad_campaign(name:, objective:, status: 'ACTIVE')
